@@ -5,6 +5,7 @@ import {parseAsArrayOf, parseAsInteger, parseAsString, useQueryState} from "nuqs
 import {cn} from "@/lib/utils.ts";
 import {CurrencyEnum} from "@/constants/types/currency.ts";
 import {CheckedState} from "@radix-ui/react-checkbox";
+import {memo, useCallback} from "react";
 
 enum StopsEnum {
   NO_STOPS = 0,
@@ -17,30 +18,55 @@ export default function Sidebar() {
 
   const [currency, setCurrency] = useQueryState('currency', parseAsString.withDefault(''))
 
-  const handleCurrencyChange = (currency: string) => () => setCurrency(currency)
+  const handleCurrencyChange = useCallback((currency: string) => () => setCurrency(currency), [setCurrency])
 
   const [stops, setStops] = useQueryState('stops', parseAsArrayOf(parseAsInteger).withDefault([]))
 
-  const handleCheckAll = (checked: CheckedState) => {
+  const handleCheckAll = useCallback((checked: CheckedState) => {
     if (checked) {
       setStops([0, 1, 2, 3])
     } else {
       setStops([])
     }
-  }
+  }, [setStops])
 
-  const handleCheck = (checked: CheckedState, type: number) => {
+  const handleCheck = useCallback((checked: CheckedState, type: number) => {
     if (checked) {
       setStops([...stops, type])
     } else {
       setStops(stops.filter((item) => item !== type))
     }
-  }
+  }, [setStops, stops])
 
-  const handleResetSearchParams = () => {
+  const handleResetSearchParams = useCallback(() => {
     setStops([])
     setCurrency('')
-  }
+  }, [setCurrency, setStops])
+
+  const Btn = memo(() =>
+    <Button
+      variant={"outline"}
+      onClick={handleResetSearchParams}
+    >
+      Сброс
+    </Button>
+  )
+
+  const ChkBox = memo(({id, label, condition, cb}: {
+    id: string,
+    label: string,
+    condition: boolean,
+    cb: (checked: boolean) => void
+  }) => (
+    <li className='flex items-center space-x-2'>
+      <Checkbox
+        id={id}
+        checked={condition}
+        onCheckedChange={cb}
+      />
+      <Label htmlFor={id}>{label}</Label>
+    </li>
+  ))
 
   return (
     <div className='flex flex-col bg-white p-4 border rounded-xl shadow-md h-fit'>
@@ -96,57 +122,44 @@ export default function Sidebar() {
         Количество пересадок
       </h2>
       <ul className='flex flex-col gap-4 mb-4'>
-        <li className='flex items-center space-x-2'>
-          <Checkbox
-            id="all"
-            checked={stops.length === 4}
-            onCheckedChange={(checked) => handleCheckAll(checked)}
-          />
-          <Label htmlFor="all">Все</Label>
-        </li>
+        <ChkBox
+          id='all'
+          label='Все'
+          condition={stops.length === 4}
+          cb={(checked) => handleCheckAll(checked)}
+        />
 
-        <li className='flex items-center space-x-2'>
-          <Checkbox
-            id="no_stops"
-            checked={stops?.includes(StopsEnum.NO_STOPS)}
-            onCheckedChange={(checked) => handleCheck(checked, StopsEnum.NO_STOPS)}
-          />
-          <Label htmlFor="no_stops">Без пересадок</Label>
-        </li>
+        <ChkBox
+          id='no_stops'
+          label='Без пересадок'
+          condition={stops?.includes(StopsEnum.NO_STOPS)}
+          cb={(checked) => handleCheck(checked, StopsEnum.NO_STOPS)}
+        />
 
-        <li className='flex items-center space-x-2'>
-          <Checkbox
-            id="one_stop"
-            checked={stops?.includes(StopsEnum.ONE_STOP)}
-            onCheckedChange={(checked) => handleCheck(checked, StopsEnum.ONE_STOP)}
-          />
-          <Label htmlFor="one_stop">1 пересадка</Label>
-        </li>
+        <ChkBox
+          id='one_stop'
+          label='1 пересадка'
+          condition={stops?.includes(StopsEnum.ONE_STOP)}
+          cb={(checked) => handleCheck(checked, StopsEnum.ONE_STOP)}
+        />
 
-        <li className='flex items-center space-x-2'>
-          <Checkbox
-            id="two_stops"
-            checked={stops?.includes(StopsEnum.TWO_STOPS)}
-            onCheckedChange={(checked) => handleCheck(checked, StopsEnum.TWO_STOPS)}
-          />
-          <Label htmlFor="two_stops">2 пересадки</Label>
-        </li>
-        <li className='flex items-center space-x-2'>
-          <Checkbox
-            id="three_stops"
-            checked={stops?.includes(StopsEnum.THREE_STOPS)}
-            onCheckedChange={(checked) => handleCheck(checked, StopsEnum.THREE_STOPS)}
-          />
-          <Label htmlFor="three_stops">3 пересадки</Label>
-        </li>
+        <ChkBox
+          id='two_stops'
+          label='2 пересадки'
+          condition={stops?.includes(StopsEnum.TWO_STOPS)}
+          cb={(checked) => handleCheck(checked, StopsEnum.TWO_STOPS)}
+        />
+
+        <ChkBox
+          id='three_stops'
+          label='3 пересадки'
+          condition={stops?.includes(StopsEnum.THREE_STOPS)}
+          cb={(checked) => handleCheck(checked, StopsEnum.THREE_STOPS)}
+        />
+
       </ul>
 
-      <Button
-        variant={"outline"}
-        onClick={handleResetSearchParams}
-      >
-        Сброс
-      </Button>
+      <Btn/>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import {List, Sidebar} from "./components";
 import plane from './assets/airplane.svg'
+import {memo} from "react";
 
 function App() {
 
@@ -20,4 +21,4 @@ function App() {
   )
 }
 
-export default App
+export default memo(App)
