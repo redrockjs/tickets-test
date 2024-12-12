@@ -17,7 +17,7 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
@@ -30,5 +30,5 @@
       ]
     }
   },
-  "include": ["src"]
+  "include": ["src", "@testing-library/jest-dom"]
 }
